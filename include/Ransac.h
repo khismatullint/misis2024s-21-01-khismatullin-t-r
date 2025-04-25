@@ -1,4 +1,5 @@
-
+#ifndef RANSAC_H_INCLUDED
+#define RANSAC_H_INCLUDED
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <vector>
@@ -55,6 +56,8 @@ namespace RansacNamespace {
         Eigen::Matrix3d transformationMatrix;
         settings();
         std::vector<cv::Point2d> get_vector_stripes_width(double width);
+        void save(const std::string& p) const;
+        static settings load(const std::string& p);
     };
 
     ///Bird_view.cpp
@@ -132,3 +135,4 @@ namespace RansacNamespace {
     cv::Point2d find_distance_point_to_center(cv::Point2d Center, cv::Point point);
     std::vector<std::vector<cv::Point2d>>  get_three_point_vector(TL lines, const cv::Mat &image, Eigen::Matrix3d& transformationMatrix, std::vector<double>& left_right_distance);
 }
+#endif

@@ -1,9 +1,21 @@
 #include "../include/Ransac.h"
+#include "../include/Dataset.h"
+#include "../include/AutoTune.h"
+#include "../include/Ransac.h"
 
-int main() {
+int main(int argc, char** argv) {
 
     RansacNamespace::settings init;
-
+    bool doTune = (argc>1 && std::string(argv[1]) == "--tune");
+    
+    if(doTune){
+        RansacNamespace::Dataset train("../dataset/culane/train");
+        init = RansacNamespace::autoTune(init, train, 1500);
+        init.save("../data/auto_params.yml");
+        std::cout<<"Лучшие параметры сохранены"<<std::endl;
+    }else{
+        init = RansacNamespace::settings::load("../data/auto_params.yml");
+    }
     // Создание объекта для обработки изображения птичьего вида и настройки его параметров.
     RansacNamespace::Bird_view bird_img;
     bird_img.get_parameters(init.video_name);
@@ -59,7 +71,7 @@ int main() {
             iteration++;
         } // общий итератор цикла
         vid.read(img);
-        cv::imwrite("screenshot_default.jpg", img);
+
         // Получение вектора определяющего ширину полос, на которые потом будет делиться изображение
         std::vector<cv::Point2d> vec_container_stripes = init.get_vector_stripes_width(cont.width_stripes);
 
@@ -75,11 +87,11 @@ int main() {
         std::vector<cv::Point> coord = {};
         //фильтрация полученных контуров
         hsv_img.filtered_img(hsv, contours, coord);
-        cv::imwrite("screenshot_filtered.jpg", hsv);
-        cv::Mat test_img = cv::Mat::zeros(hsv.size(), hsv.type());
-        cv::drawContours(test_img, contours, -1, cv::Scalar(255, 255, 255), -1);
 
-        //RansacNamespace::draw_inliers(bird, coord);
+        cv::Mat test_img = cv::Mat::zeros(hsv.rows, hsv.cols, CV_8UC3);
+        cv::drawContours(test_img, contours, -1, cv::Scalar::all(255), -1);
+
+//        RansacNamespace::draw_inliers(bird, coord);
 
         // Применение RANSAC для обнаружения линий.
         lines = RansacNamespace::RANSACLines(coord, init.min_inliers, init.Dist_threshold);
@@ -112,7 +124,7 @@ int main() {
         cv::Mat line_image = cv::Mat::zeros(bird.size(), bird.type());
         RansacNamespace::draw_lines(line_image, Polylines, true, result_type_of_lines);
 //        RansacNamespace::draw_lines(bird, lines, false, result_type_of_lines);
-        cv::imwrite("screenshot_ransac_lines.jpg", line_image);
+
         //Получение дистанции до левой и правой полосы
 
 
@@ -125,7 +137,7 @@ int main() {
         cv::imshow("fif2", bird);
         line_image = bird_img.warpImage(line_image, img, matrixBird, init.parametersBird , 'r');
         line_image = line_image + img;
-        cv::imwrite("screenshot_final_lines.jpg", line_image);
+
         // Отображение информации о расстоянии.
         std::stringstream ss1;
         textPosition = {400, 100};
@@ -149,4 +161,3 @@ int main() {
 
     return 0;
 }
-

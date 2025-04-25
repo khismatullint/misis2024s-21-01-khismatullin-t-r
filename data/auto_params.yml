@@ -1,0 +1,13 @@
+%YAML:1.0
+---
+parametersHSV: [ 67, 203, 243, 33, 187, 199 ]
+parametersBird: [ 381, 350, 557, 350, 0, 531, 906, 533, 608, 371 ]
+sens_for_type: 200
+fontSize: 1
+thickness: 2
+width_line_search: 20
+Dist_threshold: 6.
+min_inliers: 28
+sense_to_normolize_data: 5
+cout_stripes: 4
+cout_containers: 10

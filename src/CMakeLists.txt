@@ -7,6 +7,7 @@ set(CMAKE_CXX_FLAGS "-fPIC -O3 -ffast-math -msse3 -mfpmath=sse")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 find_package(Eigen3 3.3 REQUIRED)
 find_package(OpenCV REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 
 foreach(dep math;random;gui;maps)
     if (NOT TARGET mrpt::${dep})
@@ -18,13 +19,12 @@ enable_testing()
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories( EIGEN3_INCLUDE_DIR )
-
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
 include(CheckCXXCompilerFlag)
 if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
 
     add_compile_options(
-            -Werror
             -Wall
             -Wextra
             -Wpedantic
@@ -41,6 +41,7 @@ if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clan
             -Wsign-conversion
             -Wsign-promo
     )
+    string(REPLACE "-Werror" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
     check_cxx_compiler_flag(-std=c++17 SUPPORTS_CXX17)
 
@@ -64,11 +65,20 @@ add_executable(RANSAC2 main.cpp
         distance_to_lane.cpp
         settings.cpp
         ../include/Ransac.h
+        ../include/Dataset.h
+        ../include/Metrics.h
+        ../include/AutoTune.h
+        ../src/Dataset.cpp
+        ../src/Metrics.cpp
+        ../src/AutoTune.cpp
 )
 
 set(PACKAGE_STRING RANSAC2)
-target_link_libraries(RANSAC2 ${OpenCV_LIBS} )
-target_link_libraries (RANSAC2 Eigen3::Eigen)
+target_link_libraries(RANSAC2
+        ${OpenCV_LIBS}
+        Eigen3::Eigen
+        nlohmann_json::nlohmann_json
+)
 foreach(dep math;random;gui;maps)
     target_link_libraries(RANSAC2 mrpt::${dep})
 endforeach()

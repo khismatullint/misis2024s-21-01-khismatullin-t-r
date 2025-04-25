@@ -53,5 +53,46 @@ namespace RansacNamespace{
 
         return vec_container_stripes; // Возвращаем вектор интервалов ширины полос.
     }
+    void settings::save(const std::string& path) const
+    {
+        cv::FileStorage fs(path, cv::FileStorage::WRITE | cv::FileStorage::FORMAT_YAML);
+        if(!fs.isOpened()) throw std::runtime_error("cannot open "+path);
+    
+        fs << "parametersHSV" << parametersHSV
+           << "parametersBird" << parametersBird
+           << "sens_for_type" << sens_for_type
+           << "fontSize" << fontSize
+           << "thickness" << thickness
+           << "width_line_search" << width_line_search
+           << "Dist_threshold" << Dist_threshold
+           << "min_inliers" << static_cast<int>(min_inliers)
+           << "sense_to_normolize_data" << sense_to_normolize_data
+           << "cout_stripes" << static_cast<int>(cout_stripes)
+           << "cout_containers" << static_cast<int>(cout_containers);
+    }
 
+    settings settings::load(const std::string& path)
+    {
+        settings s;                       // дефолт
+        cv::FileStorage fs(path, cv::FileStorage::READ);
+        if(!fs.isOpened()){               // нет файла – оставляем дефолт
+            std::cerr<<"settings::load: "<<path<<" not found, using defaults\n";
+            return s;
+        }
+        fs["parametersHSV"] >> s.parametersHSV;
+        fs["parametersBird"] >> s.parametersBird;
+        fs["sens_for_type"] >> s.sens_for_type;
+        fs["fontSize"] >> s.fontSize;
+        fs["thickness"] >> s.thickness;
+        fs["width_line_search"] >> s.width_line_search;
+        fs["Dist_threshold"] >> s.Dist_threshold;
+    
+        int tmp=0;
+        fs["min_inliers"] >> tmp;              s.min_inliers  = static_cast<size_t>(tmp);
+        fs["sense_to_normolize_data"] >> s.sense_to_normolize_data;
+        fs["cout_stripes"] >> tmp;             s.cout_stripes = static_cast<size_t>(tmp);
+        fs["cout_containers"] >> tmp;          s.cout_containers = static_cast<size_t>(tmp);
+    
+        return s;
+    }
 }

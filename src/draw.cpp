@@ -56,6 +56,8 @@ namespace RansacNamespace {
  *  result_type_of_lines   Указатель на вектор с значениями типов линий 1-сплошная 0-прерывистая.
  */
     void draw_lines(cv::Mat image, TL &lines, bool Polynom, std::vector<bool>& result_type_of_lines) {
+        if(image.channels()==1) cv::cvtColor(image, image, cv::COLOR_GRAY2BGR);
+
         vec coords_for_drow; // Вектор для хранения координат линий для отрисовки.
         std::vector<cv::Point> contour; // Вектор для хранения контуров линий.
         const cv::Point *pts; // Указатель на массив точек контура.
